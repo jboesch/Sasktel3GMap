@@ -1,6 +1,12 @@
 <?
 class SasktelParser {
     
+    /**
+    * Grab the DOMDocument instance and query/parse 3G and non 3G files.
+    * We check a cache before we actually hit Google though.
+    *
+    * @param Object $dom The DOMDocument instance passed from SasktelFetcher
+    */
     public function __construct($dom){
         
         $this->dom = $dom;
@@ -11,6 +17,10 @@ class SasktelParser {
         
     }
     
+    /**
+    * If our cache is expired, or the file doesn't exist, hit Google and get some lat/lng info.
+    * After we're done we store the info and cache it.
+    */
     public function queryAndParse3G(){
         
         if(SasktelCache::cacheExpired(SasktelCache::JS_CURRENTLY_3G)){ 
@@ -31,6 +41,10 @@ class SasktelParser {
         
     }
     
+    /**
+    * If our cache is expired, or the file doesn't exist, hit Google and get some lat/lng info.
+    * After we're done we store the info and cache it.
+    */
     public function queryAndParseNon3G(){
         
         if(SasktelCache::cacheExpired(SasktelCache::JS_NON_3G)){            
@@ -64,6 +78,11 @@ class SasktelParser {
         
     }
     
+    /**
+    * Since Sasktel doesn't have a consistent format for dates, we try and remedy that.
+    * 
+    * @param String $date The date format we're passing in
+    */
     public static function normalizeDate($date){
     
         $new_date = str_replace(array(' -', '- '), '-', $date);
@@ -89,6 +108,12 @@ class SasktelParser {
         
     }
     
+    /**
+    * When we hit Google with these city names (given by Sasktel), Google has NO IDEA wtf some of these cities/towns
+    * are. We can strip a few things off in the city name to help Google find the location
+    *
+    * @param String $city The city name
+    */
     public static function normalizeCity($city){
         
         // Some quick hard-coded fixes to help Google make proper queries
@@ -106,6 +131,13 @@ class SasktelParser {
         
     }
     
+    /**
+    * Create and return an array of all the data we need to store in 
+    * the cached js file 
+    *
+    * @param String $city The city name to make the google query with
+    * @param String $date The date (optional: if it's a non 3g location)
+    */
     protected static function _createCityDataArray($city, $date = ''){
         
         $city = self::normalizeCity($city);
